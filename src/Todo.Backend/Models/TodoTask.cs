@@ -36,7 +36,6 @@ namespace Todo.Backend.Models
         /// <summary>
         /// Navigational property for child tasks
         /// </summary>
-        [JsonIgnore]
         public ICollection<TodoTask> Children { get; set; }
 
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,7 @@ namespace Todo.Backend.Controllers
         [HttpGet("{id}")]
         public IActionResult GetTask(int id)
         {
-            var task = _db.Task.FirstOrDefault(x => x.Id == id);
+            var task = _db.Task.Include(x => x.Children).FirstOrDefault(x => x.Id == id);
 
             if (task == null)
             {
