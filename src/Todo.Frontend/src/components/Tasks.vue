@@ -1,14 +1,17 @@
 <template>
+    <template v-for="task in tasks">
 
+    </template>
 </template>
 <script lang="js">
     import Vue from 'vue';
+    import axios from 'axios';
 
     export default Vue.extend({
         data() {
             return {
                 loading: false,
-                post: null
+                tasks: []
             };
         },
         created() {
@@ -24,14 +27,10 @@
             fetchData() {
                 this.post = null;
                 this.loading = true;
-
-                fetch('api/tasks')
-                    .then(r => r.json())
-                    .then(json => {
-                        this.post = json;
-                        this.loading = false;
-                        return;
-                    });
+                axios.get("/api/tasks").then(d => {
+                    console.log(d.data);
+                })
             }
-        },
+        }
+    });
 </script>

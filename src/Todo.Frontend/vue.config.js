@@ -24,8 +24,9 @@ module.exports = {
             cert: fs.readFileSync(certFilePath),
         },
         proxy: {
-            '^/tasks': {
-                target: 'https://localhost:5001/'
+            '/api/*': {
+                target: 'https://localhost:5001/',
+                changeOrigin: true
             }
         },
         port: 5002

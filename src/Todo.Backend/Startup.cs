@@ -27,7 +27,10 @@ namespace Todo.Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddLogging(config => {
+                config.AddConsole();
+            });
+
             services.AddControllers();
             services.AddDbContext<TodoDbContext>(options =>
             {
@@ -53,6 +56,13 @@ namespace Todo.Backend
             app.UseRouting();
 
             app.UseAuthorization();
+           
+            app.UseCors(c =>
+            {
+                c.AllowAnyOrigin();
+                c.AllowAnyHeader();
+                c.AllowAnyMethod();
+            });
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
