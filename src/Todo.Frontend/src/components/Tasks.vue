@@ -1,32 +1,6 @@
 <template>
-    <div class="post">
-        <div v-if="loading" class="loading">
-            Loading...
-        </div>
 
-        <div v-if="post" class="content">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Temp. (C)</th>
-                        <th>Temp. (F)</th>
-                        <th>Summary</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="forecast in post" :key="forecast.date">
-                        <td>{{ forecast.date }}</td>
-                        <td>{{ forecast.temperatureC }}</td>
-                        <td>{{ forecast.temperatureF }}</td>
-                        <td>{{ forecast.summary }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </template>
-
 <script lang="js">
     import Vue from 'vue';
 
@@ -60,5 +34,4 @@
                     });
             }
         },
-    });
 </script>
