@@ -3,9 +3,9 @@
         <b-form-input v-model="search" placeholder="Search tasks"></b-form-input>
         
         <!-- Render all the base level tasks -->
-        <vue-draggable-group v-model="tasks">
+        <vue-draggable-group v-model="tasks" :groups="tasks">
             <div class="tasks" >
-                <task v-for="task in tasks" :key="task.id" :task="task" />
+                <task v-for="task in mainTasks" :key="task.id" v-bind:task="task" :tasks="tasks" />
             </div>
         </vue-draggable-group>
         
@@ -29,7 +29,9 @@
             return {
                 dndOptions: {
                     dropzoneSelector: '.tasks',
-                    draggableSelector: '.task'
+                    draggableSelector: '.task',
+                    onDragend: (e,d) => { console.log(e); console.log(d); },
+
                 },
                 loading: false,
                 tasks: [
@@ -41,8 +43,7 @@
                         deadlineAt: "2021-09-21T12:00:00",
                         priority: 1,
                         status: 0,
-                        parentId: null,
-                        children: null
+                        parentId: null
                     },
                     {
                         id: 2,
@@ -52,8 +53,27 @@
                         deadlineAt: null,
                         priority: 1,
                         status: 0,
-                        parentId: 1,
-                        children: null
+                        parentId: null,
+                    },
+                    {
+                        id: 3,
+                        summary: 'Purchase lederhosen 2',
+                        description: 'It\'s almost oktoberfest season',
+                        createdAt: "2021-09-03T18:02:20",
+                        deadlineAt: null,
+                        priority: 1,
+                        status: 0,
+                        parentId: 2
+                    },
+                    {
+                        id: 4,
+                        summary: 'Purchase lederhosen 3',
+                        description: 'It\'s almost oktoberfest season',
+                        createdAt: "2021-09-03T18:02:20",
+                        deadlineAt: null,
+                        priority: 1,
+                        status: 0,
+                        parentId: 2
                     }
                 ],
                 search: ''
@@ -72,38 +92,23 @@
             fetchData() {
                 this.post = null;
                 this.loading = true;
-                this.tasks.push();
-
-                this.tasks.push();
                 /*axios.get("/api/tasks").then(d => {
                     console.log(d.data);
                 })*/
+            },
+            onTaskUpdated(task) {
+                let i = this.tasks.findIndex(t => t.id === task.id);
+                this.tasks[i] = task;
+            },
+            onDragend(e) {
+                console.log(e)
+            }
+        },
+        computed: {
+            // Tasks that have no parent
+            mainTasks() {
+                return this.tasks.filter(t => { return !t.parentId })
             }
         }
     });
 </script>
-<style>
-    
-    ul {
-        list-style: none;
-        margin:0;
-        padding: 0;
-    }
-
-    .task {
-        margin: 10px;
-        height: 100px;
-        background: rgba(0,0,0, 0.4);
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-
-    .item-dropzone-area {
-        height: 6rem;
-        background: #888;
-        opacity: 0.8;
-        animation-duration: 0.5s;
-        animation-name: nodeInserted;
-        margin-left: 0.6rem;
-        margin-right: 0.6rem;
-    }
-</style>
