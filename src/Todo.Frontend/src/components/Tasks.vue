@@ -1,13 +1,11 @@
 <template>
-    <div class="drag-container drag-wrapper" v-drag-and-drop:options="dndOptions">
+    <div>
         <b-form-input v-model="search" placeholder="Search tasks"></b-form-input>
         
         <!-- Render all the base level tasks -->
-        <vue-draggable-group v-model="tasks" :groups="tasks">
-            <div class="tasks" >
-                <task v-for="task in mainTasks" :key="task.id" v-bind:task="task" :tasks="tasks" />
-            </div>
-        </vue-draggable-group>
+        <draggable :list="tasks" :group="{ name: 'tasks' }" :data-parent="null" handle=".drag-handle" >
+            <task v-for="task in tasks" :key="task.id" v-bind:task="task" :tasks="tasks" />
+        </draggable>
         
         
     </div>
@@ -15,24 +13,16 @@
 <script lang="js">
     import Vue from 'vue';
     //import axios from 'axios';
-    import Task from './Task.vue'
-    import { VueDraggableDirective } from 'vue-draggable'
+    import task from './Task.vue'
+    import draggable from 'vuedraggable'
 
     export default Vue.extend({
-        directives: {
-            dragAndDrop: VueDraggableDirective
-        },
         components: {
-            Task
+            task,
+            draggable
         },
         data() {
             return {
-                dndOptions: {
-                    dropzoneSelector: '.tasks',
-                    draggableSelector: '.task',
-                    onDragend: (e,d) => { console.log(e); console.log(d); },
-
-                },
                 loading: false,
                 tasks: [
                     {
@@ -43,7 +33,18 @@
                         deadlineAt: "2021-09-21T12:00:00",
                         priority: 1,
                         status: 0,
-                        parentId: null
+                        parentId: null,
+                        children: [
+                            {
+                                id: 5,
+                                summary: 'Go to store',
+                                description: 'Purchase dozen eggs',
+                                createdAt: "2021-09-03T18:02:20",
+                                deadlineAt: "2021-09-21T12:00:00",
+                                priority: 2,
+                                status: 0,
+                            }
+                        ]
                     },
                     {
                         id: 2,
@@ -54,27 +55,30 @@
                         priority: 1,
                         status: 0,
                         parentId: null,
+                        children: [
+                            {
+                                id: 3,
+                                summary: 'Purchase lederhosen 2',
+                                description: 'It\'s almost oktoberfest season',
+                                createdAt: "2021-09-03T18:02:20",
+                                deadlineAt: null,
+                                priority: 1,
+                                status: 0,
+                                parentId: 2
+                            },
+                            {
+                                id: 4,
+                                summary: 'Purchase lederhosen 3',
+                                description: 'It\'s almost oktoberfest season',
+                                createdAt: "2021-09-03T18:02:20",
+                                deadlineAt: null,
+                                priority: 1,
+                                status: 0,
+                                parentId: 2
+                            }
+                        ]
                     },
-                    {
-                        id: 3,
-                        summary: 'Purchase lederhosen 2',
-                        description: 'It\'s almost oktoberfest season',
-                        createdAt: "2021-09-03T18:02:20",
-                        deadlineAt: null,
-                        priority: 1,
-                        status: 0,
-                        parentId: 2
-                    },
-                    {
-                        id: 4,
-                        summary: 'Purchase lederhosen 3',
-                        description: 'It\'s almost oktoberfest season',
-                        createdAt: "2021-09-03T18:02:20",
-                        deadlineAt: null,
-                        priority: 1,
-                        status: 0,
-                        parentId: 2
-                    }
+                    
                 ],
                 search: ''
             };
@@ -99,10 +103,8 @@
             onTaskUpdated(task) {
                 let i = this.tasks.findIndex(t => t.id === task.id);
                 this.tasks[i] = task;
-            },
-            onDragend(e) {
-                console.log(e)
             }
+            
         },
         computed: {
             // Tasks that have no parent

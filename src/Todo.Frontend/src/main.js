@@ -9,7 +9,7 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
 /* Vue Draggable */
-import VueDraggable from 'vue-draggable'
+import VueDraggable from 'vuedraggable'
 Vue.use(VueDraggable)
 
 Vue.config.productionTip = false

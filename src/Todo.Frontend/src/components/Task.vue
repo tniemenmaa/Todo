@@ -2,6 +2,7 @@
     <b-card no-body class="task" :data-id="task.id">
         <b-card-header class="row align-items-start" header-tag="header" role="tab">
             <!-- Display data --> 
+            <b-card-text class="col-1"><b-icon class="drag-handle" icon="grip-vertical"></b-icon></b-card-text>
             <b-card-text class="col" v-b-toggle="'task-accordion-'+task.id">{{ task.summary }}</b-card-text>
             <b-card-text class="col">{{ task.createdAt }}</b-card-text>
             <b-card-text class="col">{{ task.priority }}</b-card-text>
@@ -52,24 +53,22 @@
                 </b-form>
 
                 <!-- Subtasks --> 
-                <vue-draggable-group v-model="tasks" :groups="tasks">
-                    <div class="tasks" >
-                        <task v-for="child in children" :key="child.id" v-bind:task="child" :tasks="tasks" />
-                    </div>
-                </vue-draggable-group>
+                <draggable :list="task.children" group="tasks" :data-parent="task.id" handle=".drag-handle">
+                    <task v-for="child in task.children" :key="child.id" v-bind:task="child" :tasks="tasks" :parentId="task.id" />
+                </draggable>
             </b-card-body>
         </b-collapse>
     </b-card>
 </template>
 <script lang="js">
 import Vue from 'vue';
-import { VueDraggableDirective } from 'vue-draggable'
+import draggable from 'vuedraggable'
 
 export default Vue.extend({
     name: 'task',
-    directives: {
-            dragAndDrop: VueDraggableDirective
-        },
+    components: {
+        draggable
+    },
     data() {
         return {
             config: {
@@ -89,7 +88,8 @@ export default Vue.extend({
     },
     props: {
         task: Object,
-        tasks: Array
+        tasks: Array,
+        parentId: { type: Number, default: null }
     },
     computed: {
         summaryState() {
@@ -116,11 +116,16 @@ export default Vue.extend({
         },
         children() {
             return this.tasks.filter(t => { return t !== null && t.parentId == this.task.id });
-        }
+        },
+    },
+    created: function() {
+        // this ensure state consistency with parent id
+        this.task.parentId = this.parentId;
     },
     methods: {
+        // Input change
         onChange() {
-            console.log("onChange")
+            // save changes    
         }
     }
 });
