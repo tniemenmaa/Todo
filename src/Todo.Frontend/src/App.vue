@@ -1,8 +1,8 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <Tasks msg="Welcome to Your Vue.js App"/>
-  </div>
+    
+    <div id="app">
+          <Tasks/>
+    </div>
 </template>
 
 <script>
@@ -11,7 +11,7 @@ import Tasks from './components/Tasks.vue'
 export default {
   name: 'App',
   components: {
-    Tasks
+      Tasks,
   }
 }
 </script>
