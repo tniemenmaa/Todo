@@ -12,7 +12,7 @@
 </template>
 <script lang="js">
     import Vue from 'vue';
-    //import axios from 'axios';
+    import axios from 'axios';
     import task from './Task.vue'
     import draggable from 'vuedraggable'
 
@@ -24,7 +24,7 @@
         data() {
             return {
                 loading: false,
-                tasks: [
+                tasks: [/*
                     {
                         id: 1,
                         summary: 'Go to store',
@@ -78,7 +78,7 @@
                             }
                         ]
                     },
-                    
+                    */
                 ],
                 search: ''
             };
@@ -96,21 +96,11 @@
             fetchData() {
                 this.post = null;
                 this.loading = true;
-                /*axios.get("/api/tasks").then(d => {
-                    console.log(d.data);
-                })*/
-            },
-            onTaskUpdated(task) {
-                let i = this.tasks.findIndex(t => t.id === task.id);
-                this.tasks[i] = task;
-            }
-            
-        },
-        computed: {
-            // Tasks that have no parent
-            mainTasks() {
-                return this.tasks.filter(t => { return !t.parentId })
-            }
+                axios.get("/api/tasks").then(r => {
+                    console.log(r);
+                    this.tasks = r.data;
+                })
+            }   
         }
     });
 </script>

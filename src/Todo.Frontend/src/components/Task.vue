@@ -62,6 +62,7 @@
 </template>
 <script lang="js">
 import Vue from 'vue';
+import axios from 'axios';
 import draggable from 'vuedraggable'
 
 export default Vue.extend({
@@ -120,12 +121,23 @@ export default Vue.extend({
     },
     created: function() {
         // this ensure state consistency with parent id
-        this.task.parentId = this.parentId;
+        if ( this.task.parentId !== this.parentId ) {
+            this.task.parentId = this.parentId;    
+            this.onChange();
+        }
+        
     },
     methods: {
         // Input change
         onChange() {
-            // save changes    
+            
+            // make a copy of the data and save changes
+            let data = JSON.parse(JSON.stringify(this.task));
+            data.children = null;
+            
+            axios.put(`/api/tasks/${this.task.id}`, data).then(r => {
+                console.log(r);
+            })
         }
     }
 });
