@@ -1,77 +1,50 @@
 <template>
     <b-card no-body class="task" :data-id="task.id">
-        <b-card-header class="row align-items-start" header-tag="header" role="tab">
+        <b-card-header class="row align-items-start m-0" header-tag="header" role="tab">
             <!-- Display data --> 
             <b-card-text class="col-1"><b-icon class="drag-handle" icon="grip-vertical"></b-icon></b-card-text>
             <b-card-text class="col" v-b-toggle="'task-accordion-'+task.id">{{ task.summary }}</b-card-text>
             <b-card-text class="col">{{ task.createdAt }}</b-card-text>
             <b-card-text class="col">{{ task.priority }}</b-card-text>
         </b-card-header>
-        <b-collapse :id="'task-accordion-'+task.id" role="tabpanel">
+        <b-collapse :id="'task-accordion-'+task.id" role="tabpanel" @show="onShow">
             <b-card-body>
-                <b-form @submit="onChange">
-                    <b-form-group label="Summary" :label-for="'input-'+task.id+'-summary'">
-                        <b-form-input @change="onChange" :id="'input-'+task.id+'-summary'" v-model="task.summary" :state="summaryState" type="text"></b-form-input>
-                        <b-form-invalid-feedback>
-                            <template v-if="task.summary.length > config.validation.maxSummary">
-                                Max summary length is {{ config.validation.maxSummary }} characters.
-                            </template>
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                    <b-form-group label="Description" :label-for="'input-'+task.id+'-description'">
-                        <b-form-textarea @change="onChange" :id="'input-'+task.id+'-description'" v-model="task.description" :state="descriptionState" placeholder="Description for the task."></b-form-textarea>
-                             <b-form-invalid-feedback>
-                            <template v-if="task.description.length > config.validation.maxDescription">
-                                Max description length is {{ config.validation.maxDescription }} characters.
-                            </template>
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                    <b-form-group label="Deadline" :label-for="'input-'+task.id+'-deadline'">
-                        <b-form-datepicker @change="onChange" :id="'input-'+task.id+'-deadline'" v-model="task.deadlineAt" :state="deadlineState" today-button  reset-button close-button></b-form-datepicker>
-                             <b-form-invalid-feedback>
-                            <template v-if="task.description.length > config.validation.maxDescription">
-                                Invalid deadline.
-                            </template>
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                    <b-form-group label="Priority" :label-for="'input-'+task.id+'-priority'">
-                        <b-form-input @change="onChange" :id="'input-'+task.id+'-priority'" :max="Number.MAX_SAFE_INTEGER" :min="Number.MIN_SAFE_INTEGER" v-model.number="task.priority" :state="priorityState" type="number"></b-form-input>
-                        <b-form-invalid-feedback>
-                            <template>
-                                Priority should be a numeric value between {{ Number.MIN_SAFE_INTEGER }} and {{ Number.MAX_SAFE_INTEGER }}.
-                            </template>
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                    <b-form-group label="Status" :label-for="'input-'+task.id+'-status'">
-                        <b-form-select @change="onChange" :id="'input-'+task.id+'-status'" v-model="task.status" :options="config.taskStates"></b-form-select>
-                        <b-form-invalid-feedback>
-                            <template>
-                                Priority should be a numeric value between {{ Number.MIN_SAFE_INTEGER }} and {{ Number.MAX_SAFE_INTEGER }}.
-                            </template>
-                        </b-form-invalid-feedback>
-                    </b-form-group>
-                </b-form>
-
+                <task-editor :task="task" :autosave="true" @save="save"></task-editor>
                 <!-- Subtasks --> 
-                <draggable :list="task.children" group="tasks" :data-parent="task.id" handle=".drag-handle">
-                    <task v-for="child in task.children" :key="child.id" v-bind:task="child" :tasks="tasks" :parentId="task.id" />
-                </draggable>
+                <div class="sub-task-container align-middle">
+                    <!-- No tasks disclaimer --> 
+                    <span class="no-items" v-if="!task.children || task.children.length === 0">No tasks</span>
+                    <!-- Task loading spinner -->
+                    <div class="text-center" v-if="loadingChildren">
+                        <b-spinner label="Loading"></b-spinner>
+                    </div>
+
+                    <draggable class="sub-tasks" :list="task.children" group="tasks" handle=".drag-handle" ghost-class="ghost">                    
+                        <task v-for="child in task.children" :key="child.id" v-bind:task="child" :parentId="task.id" @save="save" @remove="remove" />
+                    </draggable>
+                </div>
+                <b-button v-b-modal="'new-task-' + task.id">New sub-task</b-button>
+                <b-button @click="remove(null)" type="danger">Delete</b-button>
             </b-card-body>
         </b-collapse>
+        <task-editor :id="'new-task-' + task.id" :autosave="false" :ismodal="true" @save="save"></task-editor>
     </b-card>
 </template>
 <script lang="js">
 import Vue from 'vue';
+import draggable from 'vuedraggable';
+import taskEditor from './TaskEditor.vue';
 import axios from 'axios';
-import draggable from 'vuedraggable'
 
 export default Vue.extend({
     name: 'task',
     components: {
-        draggable
+        draggable,
+        taskEditor
     },
     data() {
         return {
+            loadingChildren: false,
             config: {
                 validation: {
                     maxSummary: 128,
@@ -114,31 +87,75 @@ export default Vue.extend({
             if ( !Number.isInteger(this.task.priority) ) return false;
             if ( !Number.isSafeInteger(this.task.priority) ) return false;
             return true;
-        },
-        children() {
-            return this.tasks.filter(t => { return t !== null && t.parentId == this.task.id });
-        },
+        }
     },
     created: function() {
         // this ensure state consistency with parent id
         if ( this.task.parentId !== this.parentId ) {
             this.task.parentId = this.parentId;    
-            this.onChange();
+            this.save(this.task);
         }
-        
     },
     methods: {
         // Input change
-        onChange() {
-            
-            // make a copy of the data and save changes
-            let data = JSON.parse(JSON.stringify(this.task));
-            data.children = null;
-            
-            axios.put(`/api/tasks/${this.task.id}`, data).then(r => {
-                console.log(r);
-            })
+        save(task, onSavedCallback) {
+            if (!task.parentId && task.id != this.task.id) {
+                task.parentId = this.task.id;
+            }
+            if (!onSavedCallback) {
+                onSavedCallback = this.onSaved;
+            }
+
+            this.$emit("save", task, onSavedCallback);
+        },
+        onSaved(task) {
+            if (!this.task.children) {
+                this.task.children = [];
+            }
+
+            this.task.children.push(task);
+        },
+        remove(task, onRemovedCallback) {
+            if (!onRemovedCallback && task) {
+                onRemovedCallback = this.onRemoved;
+            }
+            if ( !task ) {
+                task = this.task;
+            }
+            this.$emit("remove", task, onRemovedCallback );
+        },
+        onRemoved(data) {
+           
+            let i = this.task.children.findIndex(c => c.id == data.id);
+
+            this.$delete(this.task.children, i);
+        },
+        onShow(){
+            // Lazy load children when drilling down
+            if ( !this.task.children ) {
+                this.loadingChildren = true;
+                axios.get(`/api/tasks/${this.task.id}`).then(r => {
+                    this.task.children = r.data.children;
+                }).finally(() => 
+                {
+                    this.loadingChildren = false;
+                })   
+            }
         }
     }
 });
 </script>
+<style scoped>
+    .sub-task-container {
+        background: #eee;
+    }
+    span.no-items {
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .sub-tasks {
+        min-height: 50px;
+    }
+</style>

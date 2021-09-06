@@ -28,13 +28,19 @@ namespace Todo.Backend.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_db.Task.Where(x => x.Parent == null).ToList());
+            return Ok(_db.Task.Include(x => x.Children).Where(x => x.Parent == null).ToList());
         }
 
         // Add new todo task
         [HttpPost]
         public async Task<IActionResult> Post(TodoTask task)
         {
+            if (task == null) {
+                return BadRequest("Task was empty.");
+            }
+
+            task.CreatedAt = DateTime.Now;
+
             var result = _db.Task.Add(task);
             await _db.SaveChangesAsync();
 
@@ -76,10 +82,17 @@ namespace Todo.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
-            var task = new TodoTask { Id = id };
-            _db.Task.Attach(task);
-            _db.Task.Remove(task);
-            await _db.SaveChangesAsync();
+            try
+            {
+                var task = new TodoTask { Id = id };
+                _db.Task.Attach(task);
+                var result = _db.Task.Remove(task);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return NotFound($"Task with id {id} was not found.");
+            }
             return Ok();
         }
     }

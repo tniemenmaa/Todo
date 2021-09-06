@@ -30,8 +30,10 @@ namespace Todo.Backend
             services.AddLogging(config => {
                 config.AddConsole();
             });
-
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
             services.AddDbContext<TodoDbContext>(options =>
             {
                 options.UseMySQL(Configuration.GetConnectionString("MySQL"));
