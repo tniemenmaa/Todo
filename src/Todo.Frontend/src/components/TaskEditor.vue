@@ -44,7 +44,7 @@
 </template>
 <script lang="js">
 import Vue from 'vue';
-
+import tasks from '../config/tasks.js';
 export default Vue.extend({
     name: 'task-editor',
     data() {
@@ -54,13 +54,7 @@ export default Vue.extend({
                     maxSummary: 128,
                     maxDescription: 1024
                 },
-                taskStates: [
-                    { value: 0, text: '' },
-                    { value: 1, text: 'Reserved' },
-                    { value: 2, text: 'Ongoing' },
-                    { value: 3, text: 'Done' },
-                    { value: 4, text: 'Pending' }
-                ]
+                taskStates: tasks.states.options
             }
         }
     },

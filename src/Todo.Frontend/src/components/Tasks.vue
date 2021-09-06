@@ -2,7 +2,14 @@
     <div>
         <b-form-input v-model="search" placeholder="Search tasks"></b-form-input>
         <b-form-select v-model="sorting" :options="config.sortingOptions"></b-form-select>
-        
+        <div class="row m-0">
+            <div class="col-1"></div>
+            <div class="col">Summary</div>
+            <div class="col">Created</div>
+            <div class="col">Deadline</div>
+            <div class="col">Priority</div>
+            <div class="col">State</div>
+        </div>
         <!-- Render all the base level tasks -->
         <draggable :list="computedTasks" :group="{ name: 'tasks' }" handle=".drag-handle" ghost-class="ghost">
             <task v-for="task in computedTasks" :key="task.id" v-bind:task="task" :tasks="tasks" @save="save" @remove="remove" />

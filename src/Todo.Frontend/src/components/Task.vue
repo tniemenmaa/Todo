@@ -1,11 +1,13 @@
 <template>
     <b-card no-body class="task" :data-id="task.id">
-        <b-card-header class="row align-items-start m-0" header-tag="header" role="tab">
+        <b-card-header class="row align-items-start m-0 p-0 pt-3" header-tag="header" role="tab">
             <!-- Display data --> 
             <b-card-text class="col-1"><b-icon class="drag-handle" icon="grip-vertical"></b-icon></b-card-text>
-            <b-card-text class="col" v-b-toggle="'task-accordion-'+task.id">{{ task.summary }}</b-card-text>
+            <b-card-text class="col font-weight-bold" v-b-toggle="'task-accordion-'+task.id">{{ task.summary }}</b-card-text>
             <b-card-text class="col">{{ task.createdAt }}</b-card-text>
+            <b-card-text class="col">{{ task.deadlineAt }}</b-card-text>
             <b-card-text class="col">{{ task.priority }}</b-card-text>
+            <b-card-text class="col">{{ taskState }}</b-card-text>
         </b-card-header>
         <b-collapse :id="'task-accordion-'+task.id" role="tabpanel" @show="onShow">
             <b-card-body>
@@ -35,6 +37,7 @@ import Vue from 'vue';
 import draggable from 'vuedraggable';
 import taskEditor from './TaskEditor.vue';
 import axios from 'axios';
+import tasks from '../config/tasks';
 
 export default Vue.extend({
     name: 'task',
@@ -50,19 +53,12 @@ export default Vue.extend({
                     maxSummary: 128,
                     maxDescription: 1024
                 },
-                taskStates: [
-                    { value: 0, text: '' },
-                    { value: 1, text: 'Reserved' },
-                    { value: 2, text: 'Ongoing' },
-                    { value: 3, text: 'Done' },
-                    { value: 4, text: 'Pending' }
-                ]
+                taskStates: tasks.states.options
             }
         }
     },
     props: {
         task: Object,
-        tasks: Array,
         parentId: { type: Number, default: null }
     },
     computed: {
@@ -87,6 +83,9 @@ export default Vue.extend({
             if ( !Number.isInteger(this.task.priority) ) return false;
             if ( !Number.isSafeInteger(this.task.priority) ) return false;
             return true;
+        },
+        taskState() {
+            return this.config.taskStates[this.task.status].text;
         }
     },
     created: function() {

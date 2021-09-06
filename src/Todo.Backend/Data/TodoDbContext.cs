@@ -25,7 +25,7 @@ namespace Todo.Backend.Data
                 .WithMany(t => t.Children)
                 .HasForeignKey(t => t.ParentId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
