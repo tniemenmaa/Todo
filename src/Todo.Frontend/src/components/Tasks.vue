@@ -1,21 +1,26 @@
 <template>
     <div>
-        <b-form-input v-model="search" placeholder="Search tasks"></b-form-input>
-        <b-form-select v-model="sorting" :options="config.sortingOptions"></b-form-select>
-        <div class="row m-0">
+        <div class="row justify-content-center m-0 mb-3">
+            <b-form-input class="col-8" v-model="search" placeholder="Search tasks"></b-form-input>
+            <b-form-select class="col-2 ml-2" v-model="sorting" :options="config.sortingOptions"></b-form-select>
+        </div>
+        <div class="row m-0 p-3 headers">
             <div class="col-1"></div>
-            <div class="col">Summary</div>
-            <div class="col">Created</div>
+            <div class="col pl-0 text-left">Summary</div>
+            <div class="col d-none d-lg-block">Created</div>
             <div class="col">Deadline</div>
             <div class="col">Priority</div>
             <div class="col">State</div>
         </div>
         <!-- Render all the base level tasks -->
         <draggable :list="computedTasks" :group="{ name: 'tasks' }" handle=".drag-handle" ghost-class="ghost">
-            <task v-for="task in computedTasks" :key="task.id" v-bind:task="task" :tasks="tasks" @save="save" @remove="remove" />
+            <task v-for="task in computedTasks" :key="task.id" :task="task" @save="save" @remove="remove" />
         </draggable>
-        
-        <b-button v-b-modal.new-task>New task</b-button>
+        <div class="row justify-content-end m-0 mt-3">
+            <div class="col text-right">
+                <b-button pill variant="primary" v-b-modal.new-task>New Task</b-button>
+            </div>
+        </div>
         <task-editor id="new-task" :autosave="false" :ismodal="true" @save="save"></task-editor>
     </div>
 </template>
@@ -40,7 +45,7 @@
                 },
                 loading: false,
                 tasks: [],
-                sorting: {},
+                sorting: null,
                 search: ''
             };
         },
@@ -63,7 +68,6 @@
                         return 0;
                      });    
                 }
-                console.log(this.search);
                 if (this.search) {
                     tasks = tasks.filter(t => t.summary.toLowerCase().includes(this.search.toLowerCase()));
                 }
@@ -75,7 +79,6 @@
                 this.post = null;
                 this.loading = true;
                 axios.get('/api/tasks').then(r => {
-                    console.log(r);
                     this.tasks = r.data;
                 })
             },
@@ -108,15 +111,9 @@
                     else {
                         let i = this.tasks.findIndex(c => c.id == task.id);
                         this.$delete(this.tasks, i);
-                        console.log('remove from root');
                     }
                 });
             }
         },
     });
 </script>
-<style scoped>
-    .ghost {
-        background: #000;
-    }
-</style>

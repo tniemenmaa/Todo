@@ -1,0 +1,40 @@
+
+.headers {
+    font-weight: bold;
+    border-top: 1px solid rgba(0,0,0,0.125);
+    border-bottom: 1px solid rgba(0,0,0,0.125);
+}
+
+.sub-task-container {
+    border: 2px dashed rgba(0,0,0,0.125);
+}
+
+.sub-task-container .no-items {
+    position: relative;
+    line-height: 70px;
+    height: 50px;
+    font-weight: bold;
+    color: rgba(0,0,0,0.250);
+}
+
+
+/* Cards */
+.card:first-child {
+    border-top: 1px solid rgba(0,0,0,0.125);
+}
+.card {
+    border-radius: 0;
+    border: 0;
+}
+.card-header {
+    background: #fdfdfd;
+}
+
+.card-body {
+    border-bottom: 1px solid rgba(0,0,0,0.125);
+    border-left: 10px solid #007bff;
+}
+
+.ghost .card-header {
+    background: rgba(0,0,0,0.050);
+}

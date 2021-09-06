@@ -3,7 +3,8 @@ const sorting = {
     // Sorting options
     options: [ 
         {
-            text: ''
+            text: 'Sort by',
+            value: null
         },
         {
             value: {

@@ -12,6 +12,9 @@ Vue.use(IconsPlugin)
 import VueDraggable from 'vuedraggable'
 Vue.use(VueDraggable)
 
+/* Styles */
+import './assets/style.css'
+
 Vue.config.productionTip = false
 
 new Vue({

@@ -3,19 +3,20 @@
         <b-card-header class="row align-items-start m-0 p-0 pt-3" header-tag="header" role="tab">
             <!-- Display data --> 
             <b-card-text class="col-1"><b-icon class="drag-handle" icon="grip-vertical"></b-icon></b-card-text>
-            <b-card-text class="col font-weight-bold" v-b-toggle="'task-accordion-'+task.id">{{ task.summary }}</b-card-text>
-            <b-card-text class="col">{{ task.createdAt }}</b-card-text>
-            <b-card-text class="col">{{ task.deadlineAt }}</b-card-text>
-            <b-card-text class="col">{{ task.priority }}</b-card-text>
-            <b-card-text class="col">{{ taskState }}</b-card-text>
+            <b-card-text class="col font-weight-bold text-left" v-b-toggle="'task-accordion-'+task.id"><span v-b-tooltip.hover title="Summary">{{ task.summary }}</span></b-card-text>
+            <b-card-text class="col d-none d-lg-block"  v-b-tooltip.hover title="Created">{{ createdAt }}</b-card-text>
+            <b-card-text class="col" v-b-tooltip.hover title="Deadline">{{ deadlineAt }}</b-card-text>
+            <b-card-text class="col" v-b-tooltip.hover title="Priority">{{ task.priority }}</b-card-text>
+            <b-card-text class="col" v-b-tooltip.hove title="Status">{{ taskState }}</b-card-text>
         </b-card-header>
         <b-collapse :id="'task-accordion-'+task.id" role="tabpanel" @show="onShow">
             <b-card-body>
                 <task-editor :task="task" :autosave="true" @save="save"></task-editor>
                 <!-- Subtasks --> 
+                <p class="label text-left font-weight-bold mb-2">Subtasks</p>
                 <div class="sub-task-container align-middle">
                     <!-- No tasks disclaimer --> 
-                    <span class="no-items" v-if="!task.children || task.children.length === 0">No tasks</span>
+                    <p class="no-items" v-if="!task.children || task.children.length === 0">No tasks</p>
                     <!-- Task loading spinner -->
                     <div class="text-center" v-if="loadingChildren">
                         <b-spinner label="Loading"></b-spinner>
@@ -25,8 +26,10 @@
                         <task v-for="child in task.children" :key="child.id" v-bind:task="child" :parentId="task.id" @save="save" @remove="remove" />
                     </draggable>
                 </div>
-                <b-button v-b-modal="'new-task-' + task.id">New sub-task</b-button>
-                <b-button @click="remove(null)" type="danger">Delete</b-button>
+                <div class="mt-3 text-right">
+                    <b-button pill variant="primary mr-1" v-b-modal="'new-task-' + task.id">New Subtask</b-button>
+                    <b-button pill variant="danger" @click="remove(null)" type="danger">Delete</b-button>
+                </div>
             </b-card-body>
         </b-collapse>
         <task-editor :id="'new-task-' + task.id" :autosave="false" :ismodal="true" @save="save"></task-editor>
@@ -49,6 +52,8 @@ export default Vue.extend({
         return {
             loadingChildren: false,
             config: {
+                dateLocale: 'en-GB',
+                
                 validation: {
                     maxSummary: 128,
                     maxDescription: 1024
@@ -86,7 +91,17 @@ export default Vue.extend({
         },
         taskState() {
             return this.config.taskStates[this.task.status].text;
+        },
+        createdAt() {
+            return new Date(this.task.createdAt).toLocaleString(this.config.dateLocale);
+        },
+        deadlineAt() {
+            if ( this.task.deadlineAt ) {
+                return new Date(this.task.deadlineAt).toLocaleDateString(this.config.dateLocale);
+            }
+            return null;
         }
+
     },
     created: function() {
         // this ensure state consistency with parent id
@@ -144,17 +159,3 @@ export default Vue.extend({
     }
 });
 </script>
-<style scoped>
-    .sub-task-container {
-        background: #eee;
-    }
-    span.no-items {
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .sub-tasks {
-        min-height: 50px;
-    }
-</style>
