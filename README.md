@@ -3,7 +3,7 @@ Demo project for todo task application build with asp.net core and vue.js.
 
 ## Description
 
-This demo project implements a todo application that allows for creating, editing and deleting todo tasks. Todo tasks can also contain subtasks and subtasks can contain their own subtasks. There is no limit to how deep this hierarchy can extend to, but the UI will at some point break. The UI will fetch children from the API on demand when drilling down to grand children and beyond of the main tasks. 
+This demo project implements a todo application that allows for creating, editing and deleting todo tasks. Todo tasks can also contain subtasks and subtasks can contain their own subtasks. There is no limit to how deep this hierarchy can extend to, but the UI will at some point break. The tasks can be moved under different tasks and subtasks or into the main task view by dragging from the drag anchor icon on the left of the task. The UI will fetch children from the API on demand when drilling down to grand children and beyond of the main tasks. 
 
 The backend uses MySQL database and entity framework to communicate with it.
 
