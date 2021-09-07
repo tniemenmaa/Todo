@@ -2,14 +2,14 @@
     <b-card no-body class="task" :data-id="task.id">
         <b-card-header class="row align-items-start m-0 p-0 pt-3" header-tag="header" role="tab">
             <!-- Display data --> 
-            <b-card-text class="col-1"><b-icon class="drag-handle" icon="grip-vertical"></b-icon></b-card-text>
-            <b-card-text class="col font-weight-bold text-left" v-b-toggle="'task-accordion-'+task.id"><span v-b-tooltip.hover title="Summary">{{ task.summary }}</span></b-card-text>
-            <b-card-text class="col d-none d-lg-block"  v-b-tooltip.hover title="Created">{{ createdAt }}</b-card-text>
-            <b-card-text class="col" v-b-tooltip.hover title="Deadline">{{ deadlineAt }}</b-card-text>
-            <b-card-text class="col" v-b-tooltip.hover title="Priority">{{ task.priority }}</b-card-text>
-            <b-card-text class="col" v-b-tooltip.hove title="Status">{{ taskState }}</b-card-text>
+            <b-card-text class="col-1"><b-icon class="drag-handle" icon="grip-vertical" @mousedown="collapse"></b-icon></b-card-text>
+            <b-card-text class="col font-weight-bold text-left" @click="toggleCollapse" role="button"><span v-b-tooltip.hover :title="isSubtask ? 'Summary' : null">{{ task.summary }}</span></b-card-text>
+            <b-card-text class="col d-none d-lg-block"  v-b-tooltip.hover :title="isSubtask ? 'Created' : null">{{ createdAt }}</b-card-text>
+            <b-card-text class="col" v-b-tooltip.hover :title="isSubtask ? 'Deadline' : null">{{ deadlineAt }}</b-card-text>
+            <b-card-text class="col" v-b-tooltip.hover :title="isSubtask ? 'Priority' : null">{{ task.priority }}</b-card-text>
+            <b-card-text class="col" v-b-tooltip.hove :title="isSubtask ? 'Status' : null">{{ taskState }}</b-card-text>
         </b-card-header>
-        <b-collapse :id="'task-accordion-'+task.id" role="tabpanel" @show="onShow">
+        <b-collapse v-model="visible" role="tabpanel" @show="onShow">
             <b-card-body>
                 <task-editor :task="task" :autosave="true" @save="save"></task-editor>
                 <!-- Subtasks --> 
@@ -19,7 +19,7 @@
                     <p class="no-items" v-if="!task.children || task.children.length === 0">No tasks</p>
                     <!-- Task loading spinner -->
                     <div class="text-center" v-if="loadingChildren">
-                        <b-spinner label="Loading"></b-spinner>
+                        <b-spinner variant="secondary" class="mb-3" label="Loading"></b-spinner>
                     </div>
 
                     <draggable class="sub-tasks" :list="task.children" group="tasks" handle=".drag-handle" ghost-class="ghost">                    
@@ -50,6 +50,7 @@ export default Vue.extend({
     },
     data() {
         return {
+            visible: false,
             loadingChildren: false,
             config: {
                 dateLocale: 'en-GB',
@@ -100,6 +101,9 @@ export default Vue.extend({
                 return new Date(this.task.deadlineAt).toLocaleDateString(this.config.dateLocale);
             }
             return null;
+        },
+        isSubtask() {
+            return this.task.parentId !== null;
         }
 
     },
@@ -155,6 +159,12 @@ export default Vue.extend({
                     this.loadingChildren = false;
                 })   
             }
+        },
+        collapse() {
+            this.visible = false;
+        },
+        toggleCollapse() {
+            this.visible = !this.visible;
         }
     }
 });

@@ -12,6 +12,10 @@
             <div class="col">Priority</div>
             <div class="col">State</div>
         </div>
+        <div v-if="loading" class="m-3">
+            <p class="text-muted font-weight-bold">Loading tasks...</p>
+            <b-spinner label="Loading tasks..."></b-spinner>
+        </div>
         <!-- Render all the base level tasks -->
         <draggable :list="computedTasks" :group="{ name: 'tasks' }" handle=".drag-handle" ghost-class="ghost">
             <task v-for="task in computedTasks" :key="task.id" :task="task" @save="save" @remove="remove" />
@@ -80,6 +84,9 @@
                 this.loading = true;
                 axios.get('/api/tasks').then(r => {
                     this.tasks = r.data;
+                })
+                .finally(() => {
+                    this.loading = false;
                 })
             },
             save(task, savedCallback) { 
