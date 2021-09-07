@@ -25,7 +25,7 @@
                 <b-button pill variant="primary" v-b-modal.new-task>New Task</b-button>
             </div>
         </div>
-        <task-editor id="new-task" :autosave="false" :ismodal="true" @save="save"></task-editor>
+        <task-editor id="new-task" :autosave="false" :ismodal="true" @save="save" title="New Task" ></task-editor>
     </div>
 </template>
 <script lang="js">
@@ -82,8 +82,19 @@
             fetchData() {
                 this.post = null;
                 this.loading = true;
-                axios.get('/api/tasks').then(r => {
+                axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`).then(r => {
                     this.tasks = r.data;
+                })
+                .catch((err) => {
+                    this.$bvToast.toast(err.details ? err.details : 'Unknown error while loading tasks.', 
+                    {
+                        title: 'Error',
+                        autoHideDelay: 5000,
+                        appendToast: true,
+                        solid: true,
+                        variant: 'danger',
+                        toaster: 'b-toaster-top-center'
+                    })
                 })
                 .finally(() => {
                     this.loading = false;
@@ -95,23 +106,41 @@
                 data.children = null;
                 
                 if ( data.id ) {
-                    axios.put(`/api/tasks/${data.id}`, data).then(r => {
-                        console.log(r);
+                    axios.put(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${data.id}`, data)                
+                        .catch((err) => {
+                            this.$bvToast.toast(err.details ? err.details : 'Unknown error while saving task.', {
+                                title: 'Error',
+                                autoHideDelay: 5000,
+                                appendToast: true,
+                                solid: true,
+                                variant: 'danger',
+                                toaster: 'b-toaster-top-center'
+                        })
                     });
                 }
                 else {
-                    axios.post('/api/tasks', data).then(r => {
+                    axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/tasks`, data).then(r => {
                         if (savedCallback) {
                             savedCallback(r.data);
                         }
                         else {
                             this.tasks.push(r.data);
                         }
-                    });
+                    })
+                    .catch((err) => {
+                            this.$bvToast.toast(err.details ? err.details : 'Unknown error while saving task.', {
+                                title: 'Error',
+                                autoHideDelay: 5000,
+                                appendToast: true,
+                                solid: true,
+                                variant: 'danger',
+                                toaster: 'b-toaster-top-center',
+                        });
+                    })
                 }
             },
             remove(task, removedCallback) {
-                axios.delete(`/api/tasks/${task.id}`).then(() => {
+                axios.delete(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${task.id}`).then(() => {
                     if (removedCallback) {
                         removedCallback(task);
                     }

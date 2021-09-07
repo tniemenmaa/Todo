@@ -32,7 +32,7 @@
                 </div>
             </b-card-body>
         </b-collapse>
-        <task-editor :id="'new-task-' + task.id" :autosave="false" :ismodal="true" @save="save"></task-editor>
+        <task-editor :id="'new-task-' + task.id" :autosave="false" :ismodal="true" @save="save" title="New Subtask"></task-editor>
     </b-card>
 </template>
 <script lang="js">
@@ -84,7 +84,7 @@ export default Vue.extend({
             return true;
         },
         priorityState() {
-            if ( typeof this.task.priority !== "number" ) return false;
+            if ( typeof this.task.priority !== 'number' ) return false;
             if ( !this.task.priority ) return null;
             if ( !Number.isInteger(this.task.priority) ) return false;
             if ( !Number.isSafeInteger(this.task.priority) ) return false;
@@ -124,7 +124,7 @@ export default Vue.extend({
                 onSavedCallback = this.onSaved;
             }
 
-            this.$emit("save", task, onSavedCallback);
+            this.$emit('save', task, onSavedCallback);
         },
         onSaved(task) {
             if (!this.task.children) {
@@ -140,7 +140,7 @@ export default Vue.extend({
             if ( !task ) {
                 task = this.task;
             }
-            this.$emit("remove", task, onRemovedCallback );
+            this.$emit('remove', task, onRemovedCallback );
         },
         onRemoved(data) {
            
@@ -152,9 +152,20 @@ export default Vue.extend({
             // Lazy load children when drilling down
             if ( !this.task.children ) {
                 this.loadingChildren = true;
-                axios.get(`/api/tasks/${this.task.id}`).then(r => {
+                axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/tasks/${this.task.id}`).then(r => {
                     this.task.children = r.data.children;
-                }).finally(() => 
+                })
+                .catch((err) => {
+                    this.$bvToast.toast(err.details ? err.details : 'Unknown error while loading subtasks.', {
+                        title: 'Error',
+                        autoHideDelay: 5000,
+                        appendToast: true,
+                        solid: true,
+                        variant: 'danger',
+                        toaster: 'b-toaster-top-center'
+                    })
+                })
+                .finally(() => 
                 {
                     this.loadingChildren = false;
                 })   

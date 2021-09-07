@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,17 +37,27 @@ namespace Todo.Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(TodoTask task)
         {
-            if (task == null) {
-                return BadRequest("Task was empty.");
+            try
+            {
+                if (task == null)
+                {
+                    return BadRequest("Task was empty.");
+                }
+
+                task.CreatedAt = DateTime.Now;
+
+                var result = _db.Task.Add(task);
+                await _db.SaveChangesAsync();
+
+                // Return result and location of the newly created task
+                return CreatedAtAction(nameof(GetTask), new { id = result.Entity.Id }, result.Entity);
             }
-
-            task.CreatedAt = DateTime.Now;
-
-            var result = _db.Task.Add(task);
-            await _db.SaveChangesAsync();
-
-            // Return result and location of the newly created task
-            return CreatedAtAction(nameof(GetTask), new { id = result.Entity.Id }, result.Entity);
+            catch (Exception e)
+            {
+                
+                _logger.LogError(e, "Failed to add new task");
+                return Problem("Failed to add new task", JsonConvert.SerializeObject(task), StatusCodes.Status500InternalServerError);
+            }
         }
 
         // Get todo task with id
@@ -70,13 +82,6 @@ namespace Todo.Backend.Controllers
             var result = _db.Task.Update(task);
             await _db.SaveChangesAsync();
             return Ok(task);
-        }
-
-        // Partial update for task wtih id
-        [HttpPatch("{id}")]
-        public TodoTask PatchTask(int id, [FromBody] TodoTask task)
-        {
-            throw new NotImplementedException();
         }
 
         [HttpDelete("{id}")]

@@ -1,5 +1,5 @@
 <template>
-    <component :is="component" :id="id" title="New Task" @ok="save">
+    <component :is="component" :id="id" :title="title" @ok="save">
         <b-form @submit="onChange">
             <b-form-group label="Summary" label-align="left" label-class="font-weight-bold" :label-for="'input-'+task.id+'-summary'">
                 <b-form-input @change="onChange" :id="'input-'+task.id+'-summary'" v-model="task.summary" :state="summaryState" type="text"></b-form-input>
@@ -75,6 +75,7 @@ export default Vue.extend({
         },
         autosave: Boolean,
         ismodal: Boolean,
+        title: String
     },
     computed: {
         summaryState() {
@@ -93,15 +94,15 @@ export default Vue.extend({
             return null;
         },
         priorityState() {
-            if ( typeof this.task.priority !== "number" ) return false;
+            if ( typeof this.task.priority !== 'number' ) return false;
             if ( !this.task.priority ) return null;
             if ( !Number.isInteger(this.task.priority) ) return false;
             if ( !Number.isSafeInteger(this.task.priority) ) return false;
             return null;
         },
         component() {
-            if ( this.ismodal ) return "b-modal";
-            return "div";
+            if ( this.ismodal ) return 'b-modal';
+            return 'div';
         }
     },
     methods: {
@@ -112,7 +113,7 @@ export default Vue.extend({
             }
         },
         save() {
-            this.$emit("save", this.task, null);
+            this.$emit('save', this.task, null);
         }
     }
 });
