@@ -36,8 +36,9 @@ Simple ASP.NET API project that has restful api for tasks. The project uses swag
 
 ## Setup
 
-1. Build and run the Todo.Backend project with dotnet commands or inside compatibile IDE. 
-2. Inside src/Todo.Frontend/ run npm install and npm run serve
-3. Navigate to http://localhost:5002
+1. Set MySQL databsae connection string to src/Todo.Backend/appsettings.json
+2. Build and run the Todo.Backend project with dotnet commands or inside compatibile IDE. 
+3. Inside src/Todo.Frontend/ run npm install and npm run serve
+4. Navigate to http://localhost:5002
 
 
